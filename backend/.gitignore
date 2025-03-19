@@ -1,0 +1,22 @@
+# Virtual Environment
+venv/
+.env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Django
+*.log
+staticfiles/
+media/
+
+# Only for Development only
+**/migrations/**
+# !**/migrations
+# !**/migrations/__init__.py
+
+# IDE
+.vscode/
+.idea/
