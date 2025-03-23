@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 from decouple import config # Load environment variables from.env file
 
@@ -27,7 +28,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+
+    'users',
+    'api',
     
 ]
 
@@ -70,7 +76,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'blogdb',
+    'NAME': config('POSTGRES_DB_NAME'),
     'USER': config('POSTGRES_DB_USER'),
     'PASSWORD': config('POSTGRES_DB_PASSWORD'),
     'HOST': 'localhost',
@@ -127,10 +133,32 @@ REST_FRAMEWORK = {
        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-       'rest_framework.authentication.TokenAuthentication',
+        'users.authentication.CookieJWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
+}
+
+# JWT settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Short-lived access token
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Long-lived refresh token
+    'ROTATE_REFRESH_TOKENS': True,                   # New refresh token on refresh
+    'BLACKLIST_AFTER_ROTATION': True,                # Invalidate old refresh tokens
+    
+    'AUTH_COOKIE': 'access_token',      # Cookie name for access token
+    'AUTH_COOKIE_DOMAIN': None,         # Domain for cookie (None for localhost)
+    'AUTH_COOKIE_SECURE': True,         # Send cookie only over HTTPS
+    'AUTH_COOKIE_HTTP_ONLY': True,      # Prevent JavaScript access
+    'AUTH_COOKIE_SAMESITE': 'Lax',      # SameSite policy
+    
+    'UPDATE_LAST_LOGIN': True,                    # Update last login timestamp when refreshing token
+    'ALGORITHM': 'HS256',                            # Encryption algorithm
+    'SIGNING_KEY': config('SECRET_KEY'),                       # Django secret key
+    
+    
+    'USER_ID_FIELD': 'email',   # Use email as the identifier in JWT payload
+    'USER_ID_CLAIM': 'user_id',  # Claim name in JWT payload
 }
 
 # CORS settings
@@ -138,3 +166,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+
+AUTH_USER_MODEL = 'users.CustomUser'
